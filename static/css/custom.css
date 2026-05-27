@@ -1,0 +1,32 @@
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.sidebar {
+    min-height: calc(100vh - 56px);
+    padding: 0;
+}
+
+.sidebar .nav-link {
+    color: #333;
+    padding: 12px 20px;
+    border-left: 3px solid transparent;
+}
+
+.sidebar .nav-link:hover {
+    background-color: #e9ecef;
+    border-left-color: #0d6efd;
+}
+
+.sidebar .nav-link i {
+    margin-right: 8px;
+}
+
+.card {
+    box-shadow: 0 2px 4px rgba(0, 0, 0, .08);
+    border: none;
+}
+
+.btn-primary {
+    background-color: #0d6efd;
+}

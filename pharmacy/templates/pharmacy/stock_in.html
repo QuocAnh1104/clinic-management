@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% block title %}Nhập kho - {{ medicine.medicine_name }}{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header bg-info text-white">
+        <h4 class="mb-0"><i class="bi bi-box-arrow-in-down"></i> Nhập kho thuốc</h4>
+    </div>
+    <div class="card-body">
+        <div class="alert alert-info">
+            <strong>Thuốc:</strong> {{ medicine.medicine_name }} ({{ medicine.get_unit_display }})<br>
+            <strong>Tồn kho hiện tại:</strong> {{ medicine.stock_quantity }}
+        </div>
+        <form method="post">
+            {% csrf_token %}
+            {% for field in form %}
+            <div class="mb-3">
+                <label class="form-label">{{ field.label }}</label>
+                {{ field }}
+            </div>
+            {% endfor %}
+            <button type="submit" class="btn btn-success">
+                <i class="bi bi-check-circle"></i> Xác nhận nhập kho
+            </button>
+            <a href="{% url 'pharmacy:medicine_list' %}" class="btn btn-secondary">Hủy</a>
+        </form>
+    </div>
+</div>
+{% endblock %}
