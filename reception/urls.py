@@ -18,4 +18,6 @@ urlpatterns = [
     path('pending/', views.pending_queue, name='pending_queue'),
     path('appointment/<int:pk>/approve/', views.approve_appointment, name='approve_appointment'),
     path('appointment/<int:pk>/reject/', views.reject_appointment, name='reject_appointment'),
+
+    path('appointment/list/', views.appointment_list, name='appointment_list'),
 ]

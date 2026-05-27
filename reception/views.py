@@ -7,6 +7,7 @@ from accounts.decorators import role_required
 from accounts.models import Patient
 from clinical.models import Appointment
 from .forms import PatientCreateForm, WalkInAppointmentForm
+from datetime import timedelta
 
 User = get_user_model()
 
@@ -228,3 +229,36 @@ def reject_appointment(request, pk):
         return redirect('reception:pending_queue')
     
     return render(request, 'reception/reject_confirm.html', {'appointment': appt})
+
+@role_required('RECEPTIONIST', 'ADMIN')
+def appointment_list(request):
+    """Danh sách lịch hẹn với filter theo ngày và bác sĩ."""
+    date_filter = request.GET.get('date', timezone.now().date().isoformat())
+    doctor_filter = request.GET.get('doctor', '')
+    status_filter = request.GET.get('status', '')
+    
+    appointments = Appointment.objects.all().order_by('appt_datetime')
+    
+    # Filter theo ngày
+    if date_filter:
+        appointments = appointments.filter(appt_datetime__date=date_filter)
+    
+    # Filter theo bác sĩ
+    if doctor_filter:
+        appointments = appointments.filter(doctor_id=doctor_filter)
+    
+    # Filter theo trạng thái
+    if status_filter:
+        appointments = appointments.filter(status=status_filter)
+    
+    # Danh sách bác sĩ để chọn
+    doctors = User.objects.filter(role='DOCTOR', is_active=True)
+    
+    return render(request, 'reception/appointment_list.html', {
+        'appointments': appointments,
+        'doctors': doctors,
+        'date_filter': date_filter,
+        'doctor_filter': doctor_filter,
+        'status_filter': status_filter,
+        'status_choices': Appointment.STATUS_CHOICES,
+    })
