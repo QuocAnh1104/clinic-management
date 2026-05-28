@@ -52,6 +52,7 @@
         <table class="table table-hover">
             <thead class="table-dark">
                 <tr>
+                    <th>Ngày khám</th>
                     <th>Giờ</th>
                     <th>Bệnh nhân</th>
                     <th>Bác sĩ</th>
@@ -63,6 +64,7 @@
             <tbody>
                 {% for appt in appointments %}
                 <tr>
+                    <td>{{ appt.appt_datetime|date:"d/m/Y" }}</td>
                     <td><strong>{{ appt.appt_datetime|date:"H:i" }}</strong></td>
                     <td>
                         {{ appt.patient.full_name }}<br>
@@ -93,7 +95,7 @@
                 </tr>
                 {% empty %}
                 <tr>
-                    <td colspan="6" class="text-center text-muted">
+                    <td colspan="7" class="text-center text-muted">
                         Không có lịch hẹn nào phù hợp với bộ lọc.
                     </td>
                 </tr>

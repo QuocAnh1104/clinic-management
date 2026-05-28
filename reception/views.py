@@ -164,10 +164,7 @@ def walkin_appointment(request, patient_id):
                 )
                 return redirect('reception:appointment_list')
     else:
-        # Mặc định: giờ hiện tại
-        form = WalkInAppointmentForm(initial={
-            'appt_datetime': timezone.now().strftime('%Y-%m-%dT%H:%M')
-        })
+        form = WalkInAppointmentForm()
     
     return render(request, 'reception/walkin_appointment.html', {
         'form': form,
@@ -233,15 +230,29 @@ def reject_appointment(request, pk):
 @role_required('RECEPTIONIST', 'ADMIN')
 def appointment_list(request):
     """Danh sách lịch hẹn với filter theo ngày và bác sĩ."""
-    date_filter = request.GET.get('date', timezone.now().date().isoformat())
+    date_filter = request.GET.get('date', '')
     doctor_filter = request.GET.get('doctor', '')
     status_filter = request.GET.get('status', '')
-    
+
     appointments = Appointment.objects.all().order_by('appt_datetime')
-    
-    # Filter theo ngày
+
+    # Filter theo ngày — dùng __range thay vì __date để tránh lỗi CONVERT_TZ MySQL
     if date_filter:
-        appointments = appointments.filter(appt_datetime__date=date_filter)
+        from datetime import datetime as dt, time
+        try:
+            selected_date = dt.strptime(date_filter, '%Y-%m-%d').date()
+            day_start = timezone.make_aware(dt.combine(selected_date, time.min))
+            day_end   = timezone.make_aware(dt.combine(selected_date, time.max))
+            appointments = appointments.filter(appt_datetime__range=(day_start, day_end))
+        except ValueError:
+            pass
+    else:
+        # Mặc định: hiện từ đầu ngày hôm nay trở đi
+        today_start = timezone.make_aware(
+            timezone.datetime.combine(timezone.localtime(timezone.now()).date(),
+                                      timezone.datetime.min.time())
+        )
+        appointments = appointments.filter(appt_datetime__gte=today_start)
     
     # Filter theo bác sĩ
     if doctor_filter:

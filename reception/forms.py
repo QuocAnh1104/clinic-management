@@ -2,6 +2,7 @@ from django import forms
 from accounts.models import Patient
 from clinical.models import Appointment
 from django.contrib.auth import get_user_model
+from django.utils import timezone
 
 User = get_user_model()
 
@@ -76,8 +77,10 @@ class WalkInAppointmentForm(forms.Form):
         label='Thời gian khám',
         widget=forms.DateTimeInput(attrs={
             'class': 'form-control',
-            'type': 'datetime-local'
-        })
+            'type': 'datetime-local',
+            'placeholder': 'VD: 2026-05-28 08:30',
+        }),
+        input_formats=['%Y-%m-%dT%H:%M'],
     )
     note = forms.CharField(
         label='Ghi chú',
@@ -88,3 +91,38 @@ class WalkInAppointmentForm(forms.Form):
             'placeholder': 'Triệu chứng sơ bộ, lý do khám...'
         })
     )
+
+    def clean_appt_datetime(self):
+        appt_dt = self.cleaned_data.get('appt_datetime')
+        if not appt_dt:
+            return appt_dt
+
+        now = timezone.localtime(timezone.now())
+
+        # Không được đặt lịch trong quá khứ
+        if appt_dt <= now:
+            raise forms.ValidationError('Không thể đặt lịch trong quá khứ. Vui lòng chọn thời gian trong tương lai.')
+
+        # Không được đặt vào cuối tuần
+        if appt_dt.weekday() >= 5:
+            raise forms.ValidationError('Phòng khám không làm việc vào thứ Bảy và Chủ Nhật.')
+
+        hour = appt_dt.hour
+        minute = appt_dt.minute
+        time_val = hour * 60 + minute  # Đổi sang phút để so sánh dễ hơn
+
+        morning_start = 7 * 60        # 07:00
+        morning_end   = 11 * 60 + 30  # 11:30
+        afternoon_start = 13 * 60     # 13:00
+        afternoon_end   = 17 * 60 + 30  # 17:30
+
+        in_morning   = morning_start <= time_val < morning_end
+        in_afternoon = afternoon_start <= time_val < afternoon_end
+
+        if not (in_morning or in_afternoon):
+            raise forms.ValidationError(
+                'Chỉ được đặt lịch trong giờ làm việc: '
+                '07:00 – 11:30 (sáng) hoặc 13:00 – 17:30 (chiều).'
+            )
+
+        return appt_dt
