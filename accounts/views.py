@@ -34,5 +34,7 @@ def dashboard(request):
         return redirect('/reception/')
     elif role == 'DOCTOR':
         return redirect('/doctor/')
+    elif role == 'PATIENT':
+        return redirect('/portal/dashboard/')
     else:
         return render(request, 'dashboard.html')

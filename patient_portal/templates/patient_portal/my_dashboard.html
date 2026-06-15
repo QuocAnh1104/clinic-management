@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+{% block title %}Trang cá nhân{% endblock %}
+
+{% block content %}
+<h2><i class="bi bi-house"></i> Xin chào, {{ patient.full_name }}!</h2>
+<p class="text-muted">Cổng thông tin bệnh nhân</p>
+
+<div class="row mb-4">
+    <div class="col-md-6">
+        <div class="card text-bg-primary">
+            <div class="card-body">
+                <h5><i class="bi bi-calendar-event"></i> Lịch hẹn sắp tới</h5>
+                <h2>{{ upcoming|length }}</h2>
+                <a href="{% url 'patient_portal:my_appointments' %}" class="text-white">Xem chi tiết →</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card text-bg-success">
+            <div class="card-body">
+                <h5><i class="bi bi-journal-medical"></i> Số lần khám</h5>
+                <h2>{{ history_count }}</h2>
+                <a href="{% url 'patient_portal:my_history' %}" class="text-white">Xem lịch sử →</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="d-grid gap-2 d-md-flex mb-4">
+    <a href="{% url 'patient_portal:book_appointment' %}" class="btn btn-primary btn-lg">
+        <i class="bi bi-calendar-plus"></i> Đặt lịch khám mới
+    </a>
+</div>
+
+{% if upcoming %}
+<div class="card">
+    <div class="card-header"><strong>Lịch hẹn sắp tới</strong></div>
+    <div class="card-body">
+        <table class="table">
+            <thead>
+                <tr><th>Bác sĩ</th><th>Thời gian</th><th>Trạng thái</th></tr>
+            </thead>
+            <tbody>
+                {% for appt in upcoming %}
+                <tr>
+                    <td>BS. {{ appt.doctor.get_full_name|default:appt.doctor.username }}</td>
+                    <td>{{ appt.appt_datetime|date:"H:i - d/m/Y" }}</td>
+                    <td>
+                        {% if appt.status == 'PENDING' %}
+                            <span class="badge bg-warning">Chờ duyệt</span>
+                        {% elif appt.status == 'CONFIRMED' %}
+                            <span class="badge bg-primary">Đã xác nhận</span>
+                        {% elif appt.status == 'CHECKED_IN' %}
+                            <span class="badge bg-success">Đã có mặt</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

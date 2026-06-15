@@ -127,7 +127,7 @@ AUTH_USER_MODEL = 'accounts.CustomUser'
 
 # URL điều hướng cho login/logout
 LOGIN_URL = '/login/'
-LOGIN_REDIRECT_URL = '/'
+LOGIN_REDIRECT_URL = '/dashboard/'
 LOGOUT_REDIRECT_URL = '/login/'
 
 # Các rule kiểm tra độ mạnh password
